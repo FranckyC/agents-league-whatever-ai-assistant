@@ -28,7 +28,7 @@ A **production-ready, extensible multi-agent system** for Microsoft 365 Copilot 
     </td>
     <td align="center" width="50%">
       <strong>💡 Copilot experience</strong><br/><br/>
-      <a href="https://youtu.be/LGkXO8tr1Fg"><img src="https://img.youtube.com/vi/LGkXO8tr1Fg/hqdefault.jpg" alt="Copilot demo video" width="400" /></a>
+      <a href="https://youtu.be/wl9O4dxJy6U"><img src="https://img.youtube.com/vi/wl9O4dxJy6U/hqdefault.jpg" alt="Copilot demo video" width="400" /></a>
     </td>
   </tr>
 </table>
