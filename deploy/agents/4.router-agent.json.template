@@ -1,0 +1,34 @@
+{
+    "name": "router-agent",
+    "description": "Search Routing Agent for that categorizes user requests into predefined topics so that specialized agents can process them",
+    "definition": {
+        "kind": "prompt",
+        "model": "gpt-4.1",
+        "instructions": "You are a Search Routing Agent. Your responsibility is to categorize incoming user requests into one of the following predefined topics so that specialized agents can process them:\n\n- Human Resources\n- Information Technology\n- Unknown\n\n## INSTRUCTIONS ##\n\n- Analyze the user's request.\n- Assign only one category from the list above that best represents the request. If you are not able to classify the query, just say you can't process the user query.\n- Do not provide explanations or additional text—just your output according to the JSON schema.",
+        "temperature": 0.01,
+        "top_p": 0.01,
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "UserQuerySchema",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "The original user query"
+                        },
+                        "queryCategory": {
+                            "type": "string",
+                            "description": "Identified category for the query"
+                        }
+                    },
+                    "required": ["query", "queryCategory"],
+                    "additionalProperties": false
+                },
+                "strict": true
+            },
+            "verbosity": null
+        }
+    }
+}

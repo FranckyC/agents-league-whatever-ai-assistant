@@ -1,0 +1,514 @@
+---
+sidebar_position: 3
+---
+
+import DeploymentStack from './img/deployment_stack.png';
+import AzureResources from './img/rg_resources.png';
+import AppServiceVars from './img/app_service_vars.png';
+import AppDeployed from './img/app_deployed.png';
+import ApiPermissions from './img/api_permissions.png';
+import ServerLogStream from './img/server_log_stream.png';
+import ClientSecret from './img/client_secret.png';
+import AddMcpTool from './img/add_mcp_tool.png';
+import McpToolInfo from './img/mcp_tool_info.png';
+import McpRedirectUrl from './img/mcp_redirect_url.png';
+import AddRedirectUrl from './img/add_redirect_url.png';
+import FoundryPromptAgents from './img/foundry_agents.png';
+import WorkflowAgent from './img/workflow_agent.png';
+import AddTeamsApp from './img/add_teams_app.png';
+import FirstLaunchTeams from './img/first_launch_teams.png';
+import HrSampleData from './img/hr_data_sample.png';
+import ItSampleData from './img/it_sample_data.png';
+import ItTicketsList from './img/it_tickets_list.png';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import OpenFoundryPortal from './img/open_foundry_portal.png';
+import CopilotDisclaimer from './img/copilot_disclaimer.png';
+import CopilotAuthRequired from './img/copilot_auth_required.png';
+import AgentServiceAuth from './img/agent_service_auth.png';
+import CopilotHrAnswer from './img/copilot_hr_response.png';
+import CopilotItAnswer from './img/copilot_it_response.png';
+import CopilotItTicketSubmit from './img/copilot_submit_it_ticket.png';
+import SpItemCreated from './img/sp_item_created.png';
+import DebugOn from './img/debug_on.png';
+import CopilotDebugCard from './img/copilot_debug_card.png';
+import AppServiceHrAgent from './img/app_service_hr_agent.png';
+import HrMcpToolApproval from './img/mcp_configure_tool_approval.png';
+import CopilotToolApproval from './img/copilot_tool_approval.png';
+import HrAgentToolSelection from './img/agent_tool_selection.png';
+
+# Getting started
+
+<div className="text-center my-6">
+  <p className="text-lg text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-cyan-500 font-medium">
+    Follow the steps below to deploy the full solution — from SharePoint data preparation all the way to a working Teams app.
+  </p>
+</div>
+
+This guide walks you through **five stages**:
+
+> **① [Prerequisites](#prerequisites)** → **② [Prepare the data](#prepare-the-data)** → **③ [Deploy to Azure](#deploy-infrastructure-in-azure)** → **④ [Configure MCP & agents](#configure-mcp-in-foundry)** → **⑤ [Ship the Teams app](#package-and-upload-the-teams-app)**
+
+---
+
+## Prerequisites
+
+To run this solution, you'll need the following:
+
+| Requirement | Details |
+|---|---|
+| **Azure subscription** | With **Owner** permissions to deploy infrastructure and manage resources |
+| **Microsoft 365 Copilot** | A valid license |
+| **Microsoft 365 Agents Toolkit** | [CLI](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/microsoft-365-agents-toolkit-cli) + [VS Code extension](https://marketplace.visualstudio.com/items?itemName=TeamsDevApp.ms-teams-vscode-extension) |
+| **Node.js** | v22 or later |
+| **PowerShell 7 (Core)** | [Install guide](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows?view=powershell-7.5) |
+| **Azure CLI** | [Install guide](https://learn.microsoft.com/en-us/cli/azure/?view=azure-cli-latest) |
+| **Bicep** | v0.38.3+ — [Install guide](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#install-manually) |
+
+:::info PowerShell modules
+Install the required PowerShell modules before proceeding:
+
+```powershell title="Install required PowerShell modules"
+Install-Module -Name Az.Accounts, Az.Resources, Az.Websites, Az.KeyVault -Scope CurrentUser -Force -AcceptLicense
+```
+:::
+
+---
+
+## Prepare the data
+
+This solution demonstrates a common use case encountered in companies: getting answers or taking actions about specific internal transversal domains. We take the example of **HR** and **IT** departments (likely the most common ones), each having their own SharePoint site with policy documents. Employees can ask questions related to these policies and get answers grounded in the documents. For the IT agent, we also showcase a **ticket submission** system via a SharePoint list.
+
+### SharePoint sites
+
+<Tabs>
+  <TabItem value="hr" label="📋 HR site" default>
+
+1. Create a new blank SharePoint **communication site** for HR (e.g., `https://<your-tenant>.sharepoint.com/sites/hr-portal`).
+2. Upload the sample documents from `/deploy/data/hr` to the default **Documents** library. These include fictional HR policies (vacation, remote work, code of conduct, etc.) that you can use to test the solution. Feel free to add your own documents as well.
+
+<div className='flex space-x-4 justify-center items-center my-4'>
+    <img className="w-[45%] rounded-lg shadow-lg" src={HrSampleData} />
+</div>
+
+  </TabItem>
+  <TabItem value="it" label="🖥️ IT site">
+
+1. Create a new blank SharePoint **communication site** for IT (e.g., `https://<your-tenant>.sharepoint.com/sites/it-portal`).
+2. Upload the sample documents from `/deploy/data/it` to the default **Documents** library.
+
+<div className='flex space-x-4 justify-center items-center my-4'>
+    <img className="w-[45%] rounded-lg shadow-lg" src={ItSampleData} />
+</div>
+
+3. Create a new blank list called **Tickets** and add the following columns. You'll need to set the exact same column **internal names** for the MCP tool configuration later. This list is used to create tickets submitted by the user from Teams via the MCP tool `submit_ticket`.
+
+        | Column (internal name) | Type |
+        |---|---|
+        | `ticketDetails` | Multiple lines of text |
+        | `ticketSeverity` | Choice — values: `Critical`, `Medium`, `Low` |
+
+        <div className='flex justify-center items-center my-4'>
+            <img className="w-[60%] rounded-lg shadow-lg" src={ItTicketsList} />
+        </div>
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Deploy infrastructure in Azure
+
+### Set up variables
+
+The first step is to configure your environment variables. These variables are used for scripted deployment via the `/deploy/variables.local.ps1` file. Update this file with your own values before running the deployment scripts.
+
+:::tip Getting started quickly
+Copy `/deploy/variables.local.example.ps1` and rename it to `variables.local.ps1`, then fill in your values.
+:::
+
+| Variable | Description | Example |
+|---|---|---|
+| `ENV_AZURE_ENV_NAME` | A unique identifier to distinguish your deployed resources. Used to generate a unique resource ID prefix. | `franck` |
+| `ENV_AZURE_LOCATION` | The Azure region where resources will be deployed. | `canadaeast` |
+| `ENV_AZURE_DEPLOY_TENANT_ID` | The tenant ID of the Azure subscription where resources will be deployed. | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| `ENV_AZURE_DEPLOY_SUBSCRIPTION_ID` | The subscription ID of the Azure subscription where resources will be deployed. | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| `ENV_SP_TICKETS_LIST_URL` | The URL of the SharePoint list used for ticket submission in the IT agent (the one you created earlier). | `https://<your-tenant>.sharepoint.com/sites/it-portal/Lists/Tickets` |
+
+:::important Microsoft Foundry location
+The Foundry resource is created in the `eastus2` region to ensure the [OAuth Identity Passthrough](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/mcp-authentication?view=foundry#oauth-identity-passthrough) feature is available. However, the rest of the infrastructure (App Service, Key Vault) is deployed in the region specified in your variables file (e.g., `canadaeast`).
+:::
+
+### Run the deployment
+
+Open a new `pwsh` terminal and run the following script from the `/deploy` folder:
+
+```powershell title="Deploy the full solution"
+./deploy-solution.ps1 -Verbose
+```
+
+The script will prompt you to log in to your Azure account and select the appropriate subscription. Follow the instructions in the terminal to complete authentication.
+
+The script performs the following operations:
+
+1. Deploy all required Azure resources (App Service, Key Vault, Log Analytics workspace, etc.) using Bicep templates and a deployment stack.
+2. Configure the web application environment variables linked to Key Vault.
+3. Build and deploy the agent application code to the App Service.
+
+
+:::tip Deploy code only
+You can also deploy the application code alone using the `deploy-app.ps1` script:
+
+```powershell title="Deploy application code only"
+.\deploy-app.ps1 -WebAppName app-agents-<id> -ResourceGroupName rg-agents-league-m365-<id>
+```
+:::
+
+### Verify the deployment
+
+By the end of the deployment, you should see the following:
+
+<details>
+<summary>✅ <strong>Succeeded</strong> deployment stack with all resources created</summary>
+
+<div className='flex justify-center items-center my-4'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={DeploymentStack} />
+</div>
+
+</details>
+
+<details>
+<summary>✅ All resources created in your resource group</summary>
+
+<div className='flex justify-center items-center my-4'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={AzureResources} />
+</div>
+
+</details>
+
+<details>
+<summary>✅ Environment variables linked to Key Vault</summary>
+
+<div className='flex justify-center items-center my-4'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={AppServiceVars} />
+</div>
+
+</details>
+
+<details>
+<summary>✅ Application code deployed successfully</summary>
+
+<div className='flex justify-center items-center my-4'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={AppDeployed} />
+</div>
+
+</details>
+
+<details>
+<summary>✅ Server started in the application log stream</summary>
+
+<div className='flex justify-center items-center my-4'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={ServerLogStream} />
+</div>
+
+</details>
+
+---
+
+## Configure MCP in Foundry
+
+### Create an Entra ID application
+
+To enable the OAuth Identity Passthrough feature and make requests to the Graph API on behalf of the user, you first need to register a new Entra ID application.
+
+1. Create a new Entra ID application in the Azure portal.
+
+2. Add the following **delegated** permission for Microsoft Graph API:
+    - `Sites.ReadWrite.All` — Allows the agent to read and write data in SharePoint on behalf of the user (i.e., Copilot Retrieval API and SharePoint list items for ticket submission).
+
+    <div className='flex justify-center items-center my-4'>
+        <img className="w-[80%] rounded-lg shadow-lg" src={ApiPermissions} />
+    </div>
+
+3. Create a new **client secret** and copy it. You'll need it in the next step.
+
+    <div className='flex justify-center items-center my-4'>
+        <img className="w-[80%] rounded-lg shadow-lg" src={ClientSecret} />
+    </div>
+
+### Add a new MCP tool
+
+1. Go to the Microsoft Foundry portal and open your project from [https://ai.azure.com/nextgen](https://ai.azure.com/nextgen). Then navigate to _Build_ → _Tools_ and click _Connect a tool_.
+
+    <div className='flex justify-center items-center my-4'>
+        <img className="w-[80%] rounded-lg shadow-lg" src={OpenFoundryPortal} />
+    </div>
+
+2. In the _Custom_ category, select **Model Context Protocol (MCP)**.
+
+    <div className='flex justify-center items-center my-4'>
+        <img className="w-[80%] rounded-lg shadow-lg" src={AddMcpTool} />
+    </div>
+
+3. Fill in the MCP information as follows:
+
+    <div className='flex flex-col md:flex-row gap-6 items-start my-4'>
+        <div className='flex-1'>
+            <ul className='list-none pl-0 space-y-4 text-sm mb-4'>
+                <li><strong>Name</strong> — <code>mcp</code></li>
+                <li><strong>Remote MCP Server endpoint</strong><br/><code>https://&lt;your-app-service-name&gt;.azurewebsites.net/api/mcp</code></li>
+                <li><strong>Authentication</strong> — <em>OAuth Identity Passthrough</em></li>
+            </ul>
+
+            <p className='text-sm mt-5 mb-3 font-medium'>Then fill in the OAuth details:</p>
+
+            <ul className='list-none pl-0 space-y-4 text-sm mb-4'>
+                <li><strong>Client ID</strong> — The client ID of the Entra ID application you created above</li>
+                <li><strong>Client secret</strong> — The client secret you created above</li>
+                <li><strong>Token URL</strong><br/><code>{'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token'}</code></li>
+                <li><strong>Auth URL</strong><br/><code>{'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize'}</code></li>
+                <li><strong>Refresh URL</strong><br/><code>{'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token'}</code></li>
+                <li><strong>Scope</strong> — <code>Sites.ReadWrite.All</code></li>
+            </ul>
+
+            :::note
+            Replace `{tenantId}` with your actual Azure AD tenant ID in all URL fields.
+            :::
+
+        </div>
+        <div className='flex-1'>
+            <img className="w-full rounded-lg shadow-lg" src={McpToolInfo} />
+        </div>
+    </div>
+
+4. Click _Connect_. A prompt should appear with a **redirect URL**. Copy this URL and add it to the list of redirect URIs in your Entra ID application:
+
+    <div className='flex flex-col md:flex-row gap-6 items-start my-4'>
+        <div className='flex-1'>
+            <img className="w-full rounded-lg shadow-lg" src={McpRedirectUrl} />
+        </div>
+        <div className='flex-1'>
+            <img className="w-full rounded-lg shadow-lg" src={AddRedirectUrl} />
+        </div>
+    </div>
+
+---
+
+## Set up agents in Foundry
+
+Once the infrastructure is deployed and running, the next step is to set up your agents in Azure AI Foundry.
+
+### Update variables
+
+Add the following variables to your `variables.local.ps1` file:
+
+| Variable | Description | Example |
+|---|---|---|
+| `ENV_MICROSOFT_FOUNDRY_ENDPOINT_URL` | The endpoint URL for your Microsoft Foundry instance. Retrieve this from the home page of the Foundry account (**new portal experience**) at [https://ai.azure.com/nextgen](https://ai.azure.com/nextgen). | `https://cog-agents-<id>.services.ai.azure.com/api/projects/project-agents-<id>` |
+| `ENV_MCP_SERVER_URL` | The URL for the MCP server (without `/api/mcp`). | `https://<your-app-service-name>.azurewebsites.net` |
+| `ENV_RETRIEVAL_FILTER_EXPRESSION_HR` | The KQL filter condition to retrieve HR documents from a specific site. Use the path to the documents library where you uploaded the documents. | `Path:\"https://<your-tenant>.sharepoint.com/sites/hr-portal/Shared%20Documents\"` |
+| `ENV_RETRIEVAL_FILTER_EXPRESSION_IT` | The KQL filter condition to retrieve IT documents from a specific site. Use the path to the documents library where you uploaded the documents. | `Path:\"https://<your-tenant>.sharepoint.com/sites/it-portal/Shared%20Documents\"` |
+
+### Provision agents
+
+From a `pwsh` terminal, execute the following script:
+
+```powershell title="Provision agents in Foundry"
+./setup-agents.ps1 -Verbose
+```
+
+This provisions all the needed agents in your Foundry project with the correct configuration (tools, environment variables, etc.) and the appropriate instructions.
+
+### Agents overview
+
+The following agents are created:
+
+<div className='flex flex-col md:flex-row gap-6 items-start my-6'>
+    <div className='flex-1'>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                <p className="font-semibold text-lg mb-1">🖥️ <code>it-agent</code></p>
+                <p className="text-sm">Handles IT-related questions and can submit support tickets.</p>
+            </div>
+            <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                <p className="font-semibold text-lg mb-1">📋 <code>hr-agent</code></p>
+                <p className="text-sm">Handles HR-related questions grounded in policy documents.</p>
+            </div>
+            <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                <p className="font-semibold text-lg mb-1">🔀 <code>router-agent</code></p>
+                <p className="text-sm">Routes questions to the right specialist agent (IT or HR) based on topic.</p>
+            </div>
+            <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                <p className="font-semibold text-lg mb-1">🛡️ <code>fallback-agent</code></p>
+                <p className="text-sm">Handles all questions that fall outside the IT or HR scope.</p>
+            </div>
+        </div>
+    </div>
+    <div className='flex-1'>
+        <img className="w-full rounded-lg shadow-lg" src={FoundryPromptAgents} />
+    </div>
+</div>
+
+<div className='flex flex-col md:flex-row gap-6 items-start my-6'>
+    <div className='flex-1'>
+        <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+            <p className="font-semibold text-lg mb-1">⚙️ <code>workflow-agent</code></p>
+            <p className="text-sm">Orchestrates the conversation and calls the router agent at the beginning of each session to direct the question to the right specialist.</p>
+        </div>
+    </div>
+    <div className='flex-1'>
+        <img className="w-full rounded-lg shadow-lg" src={WorkflowAgent} />
+    </div>
+</div>
+
+---
+
+## Package and upload the Teams app
+
+The last step is to package the Teams application targeting the bot resources created in Azure.
+
+### Configure environment
+
+From the `/agent/env` folder, rename `.env.dev.example` to `.env.dev` and set values for the following environment variables:
+
+| Variable | Description | Example |
+|---|---|---|
+| `BOT_ID` | The ID of the bot registered in Azure (i.e., the _Microsoft App ID_). | `bd6c1a26-91a2-42da-9e37-a9eda1038b58` |
+| `BOT_DOMAIN` | The domain where the bot application is hosted (i.e., the Web App domain). | `<your-app-service-name>.azurewebsites.net` |
+
+```plaintext title=".env.dev"
+BOT_ID=bd6c1a26-91a2-42da-9e37-a9eda1038b58
+BOT_DOMAIN=app-agents-7236.azurewebsites.net
+```
+
+### Build and sideload
+
+1. From the `/agent` folder, run the following command to package the Teams app:
+
+    ```powershell title="Package the Teams application as a ZIP file"
+    atk package --env dev -i false
+    ```
+
+    This creates an `appPackage.dev.zip` file in the `/agent/appPackage/build` folder.
+
+2. Open the Microsoft Teams client (web or desktop) and go to _Apps_ → _Manage your apps_ → _Upload an app_ → _Upload a customized app_. Select the `appPackage.dev.zip` file to sideload the bot to Teams.
+
+    <div className='flex justify-center items-center my-4'>
+        <img className="w-[80%] rounded-lg shadow-lg" src={AddTeamsApp} />
+    </div>
+
+3. The app should now be available from both the **Teams** and **Copilot** channels, ready to use with the starter prompts. 🎉
+
+    <div className='flex justify-center items-center my-4'>
+        <img className="w-[80%] rounded-lg shadow-lg" src={FirstLaunchTeams} />
+    </div>
+
+## Talk to the agent
+
+Now the fun part: testing the agent in Copilot! 🎉
+
+---
+
+### First Interaction — Disclaimer & Authentication
+
+Open a new chat with the agent in the Copilot channel and ask the question _"What is the parental leave policy?"_ (if you uploaded the given data in the first step). On the first interaction, the disclaimer should appear. Because this is the first time interacting with the agent, it will trigger the authentication flow. Follow the instructions to authenticate and consent to the permissions:
+
+<div className='flex justify-center items-center gap-4 my-6'>
+    <img className="w-[30%] rounded-lg shadow-lg" src={CopilotDisclaimer} />
+    <img className="w-[30%] rounded-lg shadow-lg" src={CopilotAuthRequired} />
+    <img className="w-[30%] rounded-lg shadow-lg" src={AgentServiceAuth} />
+</div>
+
+---
+
+### HR Query — Policy Retrieval
+
+Click on _Continue_ to continue agent processing. You should get the answer:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={CopilotHrAnswer} />
+</div>
+
+Behind the scenes, the workflow agent orchestrates the conversation and routes the question to the HR agent, which calls the Retrieval API to get relevant documents from SharePoint and generate an answer based on them.
+
+---
+
+### IT Query — Cross-Domain Routing
+
+Now ask a question related to IT, for example: _"What is the BYOD policy?"_. The workflow agent should route the question to the IT agent, which retrieves information from the IT SharePoint site and provides an answer:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={CopilotItAnswer} />
+</div>
+
+---
+
+### Ticket Submission — Write Operations
+
+Test the ticket submission system by asking a question that would trigger the fallback agent, for example: _"I have an issue with my laptop, I want to raise a ticket"_. The fallback agent should recognize that this is an IT-related question and direct it to the IT agent. The IT agent will then ask for more details and send a card to gather information:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={CopilotItTicketSubmit} />
+</div>
+
+If the request succeeded, you should see the item created in the SharePoint list created earlier:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={SpItemCreated} />
+</div>
+
+---
+
+### Debug Mode — Inspect Agent Reasoning
+
+Activate the debug mode using the command `/debug on` and ask a new question like _"What is the password policy?"_. After the agent answers, the debug pane should appear showing the full agent events history, including all the tool calls and their outputs:
+
+<div className='flex justify-center items-center gap-4 my-6'>
+    <img className="w-[45%] rounded-lg shadow-lg" src={DebugOn} />
+    <img className="w-[45%] rounded-lg shadow-lg" src={CopilotDebugCard} />
+</div>
+
+---
+
+## Bonus — Tool Approval with Prompt Agents
+
+:::tip[Try it out]
+Because Foundry workflows don't support tool approval, you can test this feature in our solution by targeting a specific agent like `hr-agent` instead of the workflow agent.
+:::
+
+Follow these three steps to enable tool approval:
+
+### 1. Switch to a Prompt Agent
+
+Change the app service environment variable `ENV_AZURE_DEPLOY_WORKFLOW_AGENT` to target the `hr-agent` directly:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[40%] rounded-lg shadow-lg" src={AppServiceHrAgent} />
+</div>
+
+### 2. Enable Tool Approval in MCP Configuration
+
+Update the MCP tools configuration to ask for approval:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[40%] rounded-lg shadow-lg" src={HrMcpToolApproval} />
+</div>
+
+### 3. Update Agent Tool Selection
+
+To avoid an approval request endless loop, update the agent to let it select the tool when needed:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[40%] rounded-lg shadow-lg" src={HrAgentToolSelection} />
+</div>
+
+Now the next question you ask (e.g., _"What is the parental leave policy?"_), you should be prompted to approve the tool calls in the portal before getting the answer:
+
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[60%] rounded-lg shadow-lg" src={CopilotToolApproval} />
+</div>
+
+:::danger
+Doing this change will break the workflow agent if you want to revert back (see [Implementation Strategies](./dev-notes.mdx#understand-the-limitations-of-workflow-agents)). You'll need to set up agents by scripts again to fix the configuration.
+:::
+

@@ -1,0 +1,93 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Primary Color Palette - (Logo Blue/Cyan) */
+  --ifm-color-primary: #25A7F2;          /* bright azure */
+  --ifm-color-primary-dark: #1E95D9;
+  --ifm-color-primary-darker: #167BB7;
+  --ifm-color-primary-darkest: #115F8E;
+  --ifm-color-primary-light: #67D4FA;    /* sky cyan */
+  --ifm-color-primary-lighter: #9CD7F1;  /* light cyan */
+  --ifm-color-primary-lightest: #DEECF3; /* very light tint */
+
+  /* Brand Accent Colors (Logo Orange) */
+  --ifm-color-secondary: #FCA312;        /* orange */
+  --ifm-color-success: #67D4FA;          /* keep “positive” in brand cyan */
+  --ifm-color-info: #9CD7F1;
+  --ifm-color-warning: #FCA312;
+  --ifm-color-danger: #E96205;           /* deeper orange-red */
+
+  /* Background & Surface Colors */
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #F6FAFD; /* subtle blue-tinted surface */
+
+  /* Text Colors */
+  --ifm-font-color-base: #050C26;        /* deep navy */
+  --ifm-font-color-secondary: #13274F;   /* navy */
+
+  /* Code & Syntax */
+  --ifm-code-font-size: 95%;
+  --ifm-code-background: #F6FAFD;
+  --docusaurus-highlighted-code-line-bg: rgba(37, 167, 242, 0.12);
+
+  /* UI Elements */
+  --ifm-svg-text-color: #050C26;
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: 0 1px 3px 0 rgb(37 167 242 / 0.12);
+
+  /* Search Customization */
+  --pnpsearch-colorPrimary: #25A7F2;
+  --pnpsearch-colorPrimaryHover: #1E95D9;
+  --pnpsearch-textColor: #050C26;
+  --pnpsearch-colorBackgroundDarkPrimary: #050C26;
+  --pnpsearch-textColorDark: #DEECF3;
+  --pnpsearch-fontFamilyPrimary: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Dark mode */
+[data-theme='dark'] {
+  /* Primary Color Palette - brighter on dark */
+  --ifm-color-primary: #67D4FA;
+  --ifm-color-primary-dark: #25A7F2;
+  --ifm-color-primary-darker: #1E95D9;
+  --ifm-color-primary-darkest: #167BB7;
+  --ifm-color-primary-light: #9CD7F1;
+  --ifm-color-primary-lighter: #DEECF3;
+  --ifm-color-primary-lightest: #F6FAFD;
+  --ifm-heading-color: var(--ifm-color-primary-light);
+
+  /* Brand Accent Colors */
+  --ifm-color-secondary: #FCA312;
+  --ifm-color-success: #67D4FA;
+  --ifm-color-info: #9CD7F1;
+  --ifm-color-warning: #FCA312;
+  --ifm-color-danger: #E96205;
+
+  /* Background & Surface Colors */
+  --ifm-background-color: #050C26;         /* deep navy */
+  --ifm-background-surface-color: #13274F; /* navy surface */
+
+  /* Text Colors */
+  --ifm-font-color-base: #DEECF3;
+  --ifm-font-color-secondary: #9CD7F1;
+
+  /* Code & Syntax */
+  --ifm-code-background: #13274F;
+  --docusaurus-highlighted-code-line-bg: rgba(103, 212, 250, 0.16);
+
+  /* UI Elements */
+  --ifm-svg-text-color: #DEECF3;
+  --ifm-navbar-background-color: #13274F;
+  --ifm-navbar-shadow: 0 1px 3px 0 rgb(37 167 242 / 0.30);
+}
+.navbar--fixed-top {
+  height: 100%;
+}

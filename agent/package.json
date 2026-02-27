@@ -1,0 +1,60 @@
+{
+    "name": "my-company-companion-agent",
+    "version": "1.0.0",
+    "msteams": {
+        "teamsAppId": null
+    },
+    "description": "Whatever AI Assistant Agent - Microsoft Agents League ",
+    "author": "Franck Cornu",
+    "license": "MIT",
+    "main": "./index.js",
+    "scripts": {
+        "dev:teamsfx": "env-cmd --silent -f .localConfigs npm run dev",
+        "dev:teamsfx:playground": "env-cmd --silent -f .localConfigs.playground npm run dev",
+        "dev:teamsfx:launch-playground": "env-cmd --silent -f env/.env.playground agentsplayground start",
+        "dev": "nodemon --exec node --inspect=9239 --signal SIGINT -r ts-node/register ./src/index.ts",
+        "build": "tsc --build",
+        "start": "node ./index.js",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "watch": "nodemon --exec \"npm run start\"",
+        "bundle": "webpack --config ./webpack.app.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com"
+    },
+    "dependencies": {
+        "@azure/ai-agents": "1.2.0-beta.2",
+        "@azure/ai-projects": "2.0.0-beta.4",
+        "@azure/identity": "^4.8.0",
+        "@azure/monitor-opentelemetry-exporter": "1.0.0-beta.32",
+        "@microsoft/adaptivecards-tools": "1.3.7",
+        "@microsoft/agents-activity": "1.3.1",
+        "@microsoft/agents-hosting-dialogs": "1.3.1",
+        "@microsoft/agents-hosting-express": "1.3.1",
+        "@microsoft/microsoft-graph-client": "3.0.7",
+        "@modelcontextprotocol/sdk": "^1.0.0",
+        "@opentelemetry/api": "^1.9.0",
+        "@opentelemetry/instrumentation": "^0.57.0",
+        "@opentelemetry/sdk-trace-node": "^2.0.0",
+        "cors": "^2.8.6",
+        "express": "^4.18.2",
+        "openai": "6.9.0",
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.0.0",
+        "@types/turndown": "^5.0.6",
+        "copy-webpack-plugin": "12.0.2",
+        "env-cmd": "^10.1.0",
+        "nodemon": "^3.1.10",
+        "shx": "^0.3.3",
+        "ts-loader": "9.4.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3",
+        "webpack": "5.97.1",
+        "webpack-cli": "^5.1.4"
+    }
+}
