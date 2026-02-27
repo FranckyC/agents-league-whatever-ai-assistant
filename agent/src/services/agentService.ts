@@ -439,6 +439,17 @@ export class AgentService {
       ? AdaptiveCardHelper.buildDebugCardAttachment(this._lastDebugInfo)
       : undefined;
 
+    // If the agent produced no text output at all, the MCP server was likely
+    // unreachable or the workflow ended without generating a message.
+    // Push a user-friendly fallback so the stream isn't empty.
+    if (!this._fullResponseText.trim()) {
+      console.warn('[STREAM] Agent produced no text output — sending fallback message');
+      this.recordDebugEvent('empty_response', 'Agent produced no text output');
+      await context.streamingResponse.queueTextChunk(
+        'Sorry, I was unable to get a response. The external service may be temporarily unavailable. Please try again in a moment.'
+      );
+    }
+
     await this.finalizeStream(context, debugAttachment ? [debugAttachment] : undefined);
 
     // Check if the agent's response ends with the SUBMIT_ISSUE marker.
