@@ -61,6 +61,24 @@ This agent was developed for the [Microsoft Agents League Contest](https://githu
 - 🔧 **Flexible & extensible** — Want to add a Finance agent, a Legal agent, a Facilities agent? No problem — the architecture is designed to be **easily scalable** and adaptable to different use cases.
 - 💡 **Real-world insights** — Tips, tricks, and strategies from actual implementation — not just theory. See [Implementation strategies](./dev-notes.mdx).
 
+<div className="relative my-10 p-6 rounded-xl border border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-cyan-50/50 dark:from-purple-900/20 dark:to-cyan-900/20">
+  <div className="text-center mb-4">
+    <span className="text-3xl">🎬</span>
+    <h3 className="text-xl font-bold mt-2 mb-1 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-cyan-500">See it in action</h3>
+    <p className="text-sm text-gray-500 dark:text-gray-400 mb-0">Watch the Whatever AI Assistant in both Microsoft Teams and Microsoft 365 Copilot</p>
+  </div>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="flex flex-col items-center">
+      <p className="font-semibold text-sm mb-2">📺 Teams experience</p>
+      <iframe width="100%" height="250" src="https://www.youtube.com/embed/IVf5V2sxwLA" title="Teams demo video" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="rounded-xl shadow-xl" />
+    </div>
+    <div className="flex flex-col items-center">
+      <p className="font-semibold text-sm mb-2">💡 Copilot experience</p>
+      <iframe width="100%" height="250" src="https://www.youtube.com/embed/LGkXO8tr1Fg" title="Copilot demo video" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="rounded-xl shadow-xl" />
+    </div>
+  </div>
+</div>
+
 The complete architecture can be seen [here](./solution-overview.mdx).
 
 Here's what the **Whatever AI Assistant** brings to the table:
@@ -127,6 +145,10 @@ To improve user experience, we use the **OpenAI Responses API** streaming capabi
     <img className="w-[80%] rounded-lg shadow-lg" src={RagPattern} />
 </div>
 
+:::info LLM Model
+We use **GPT 4.1** for all the agents as it is sufficiently capable of handling both the routing and the question-answering tasks in this scenario. However, the architecture is model-agnostic, so you can choose different models for different agents based on their specific needs and complexity
+:::
+
 ---
 
 ### Secure MCP Server with OAuth Identity Passthrough
@@ -186,7 +208,7 @@ Knowing *why* your agent gave a wrong answer is key to improving it. This soluti
 
 ### OpenTelemetry Integration for MCP Tools
 
-The solution demonstrates how to integrate **OpenTelemetry** in MCP tools to capture detailed telemetry for all interactions with the MCP server — including tool calls, responses, and errors. This allows developers to monitor and troubleshoot their agents more effectively, with insights directly integrated into the **Foundry portal**.
+The solution demonstrates how to integrate **OpenTelemetry** with HTTP headers with propagation (`traceparent`) in MCP tools to capture detailed telemetry for all interactions with the MCP server — including tool calls, responses, and errors. This allows developers to monitor and troubleshoot their agents more effectively, with insights directly integrated into the **Foundry portal** via Application Insights.
 
 <div className='flex justify-center items-center my-6'>
     <img className="w-[80%] rounded-lg shadow-lg" src={OpenTelemetry} />

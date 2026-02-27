@@ -16,7 +16,22 @@
 
 ## What is this?
 
-A **production-ready multi-agent system** that answers HR and IT questions through Microsoft 365 Copilot Chat and Microsoft Teams. Built with Microsoft Foundry Agent Service, Microsoft 365 Agents SDK, and a custom MCP server.
+A **production-ready, extensible multi-agent system** for Microsoft 365 Copilot Chat and Microsoft Teams. It showcases a flexible pattern for common cross-domain company agents, covering both question-and-answer scenarios (RAG pattern) and action automation (e.g., IT ticket submission). Built with Microsoft Foundry Agent Service, Microsoft 365 Agents SDK, and a custom MCP server.
+
+<h3 align="center">🎬 See it in action</h3>
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <strong>📺 Teams experience</strong><br/><br/>
+      <a href="https://youtu.be/IVf5V2sxwLA"><img src="https://img.youtube.com/vi/IVf5V2sxwLA/hqdefault.jpg" alt="Teams demo video" width="400" /></a>
+    </td>
+    <td align="center" width="50%">
+      <strong>💡 Copilot experience</strong><br/><br/>
+      <a href="https://youtu.be/LGkXO8tr1Fg"><img src="https://img.youtube.com/vi/LGkXO8tr1Fg/hqdefault.jpg" alt="Copilot demo video" width="400" /></a>
+    </td>
+  </tr>
+</table>
 
 ## Key Highlights
 
@@ -25,7 +40,7 @@ A **production-ready multi-agent system** that answers HR and IT questions throu
 | **Multi-Agent Routing** | A workflow agent routes queries to specialized HR, IT, or Fallback agents — transparently to the user |
 | **Streaming Responses** | OpenAI Responses API + Teams streaming for a smooth conversational experience |
 | **MCP Server with OAuth** | Custom MCP server secured via [OAuth Identity Passthrough](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/mcp-authentication?view=foundry#oauth-identity-passthrough) — delegated permissions only |
-| **Read & Write MCP Tools** | `copilot_retrieval` for SharePoint knowledge retrieval · `submit_ticket` for IT ticket submission |
+| **Read & Write MCP Tools** | `copilot_retrieval` for SharePoint knowledge retrieval via the Copilot Retrieval API · `submit_ticket` for IT ticket submission in a SharePoint list |
 | **Adaptive Cards** | Debug card, ticket form, disclaimer, and MCP tool approval — all as rich interactive cards |
 | **Custom Disclaimer** | Dynamic Adaptive Card disclaimer on first interaction or new chat sessions |
 | **Human in the Loop** | MCP tool approval flow via dynamic Adaptive Cards |
@@ -43,7 +58,6 @@ A **production-ready multi-agent system** that answers HR and IT questions throu
 npm i
 npm run start
 ```
-
 
 ## Architecture at a Glance
 
@@ -91,6 +105,18 @@ npm run start
 - 🚀 **Production-ready** — Fully automated deployment to Azure, not just a demo
 - 🔧 **Flexible & extensible** — Add new agents (Finance, Legal, etc.) without changing the user experience
 - 💡 **Real-world insights** — Practical tips from actual implementation
+
+## Contest Criteria
+
+| Criterion | Status | Details |
+| --- | :---: | --- |
+| **Microsoft 365 Copilot Chat Agent** | ✅ | Fully accessible within both **Microsoft 365 Copilot Chat** and **Microsoft Teams**, providing a seamless conversational experience across platforms. |
+| **External MCP Server Integration (Read/Write)** | ✅ | Integrates an external custom MCP server supporting both **read** and **write** operations. `copilot_retrieval` for SharePoint knowledge retrieval · `submit_ticket` for IT ticket submission. |
+| **OAuth Security for MCP Server** | ✅ | All MCP server interactions secured via [OAuth Identity Passthrough](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/mcp-authentication?view=foundry#oauth-identity-passthrough) — **delegated permissions only**. |
+| **Adaptive Cards for UI/UX** | ✅ | Multiple Adaptive Cards: 🐛 Debug card · 🎫 Ticket submission form · ⚠️ Disclaimer card · 🔐 MCP tool approval card. |
+| **Connected Agents Architecture** | ✅ | Multi-agent architecture with four specialized agents: 📋 HR Agent · 🖥️ IT Agent · 🛡️ Fallback Agent · 🔀 Router Agent — powered by Foundry workflow agents. |
+
+
 
 ## Author
 
