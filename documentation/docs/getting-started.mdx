@@ -517,19 +517,19 @@ To avoid an approval request endless loop, update the agent to let it select the
     </div>
 </div>
 
-Open an new chat in the Copilot application to reset the conversation (you can also use the `/reset` command). Now the next question you ask (e.g., _"What is the parental leave policy?"_), you should be prompted to approve the tool calls in the portal before getting the answer:
+Open a new chat in the Copilot application to reset the conversation (you can also use the `/reset` command). Now the next question you ask (e.g., _"What is the parental leave policy?"_), you should be prompted to approve the tool calls in the portal before getting the answer:
 
 <div className='flex justify-center items-center my-6'>
     <img className="w-[60%] rounded-lg shadow-lg" src={CopilotToolApproval} />
 </div>
 
 :::tip 
-On Teams experience, the card is updated wit hthe user choice. However, it seems taht is not possibel to achieve the same in the Copilot channel (meaning the approval card is not updated).
+On Teams experience, the card is updated with the user choice. However, it seems that is not possible to achieve the same in the Copilot channel (meaning the approval card is not updated).
 <div className='flex justify-center items-center my-6'>
     <img className="w-[60%] rounded-lg shadow-lg" src={ToolApprovedTeams} />
 </div>
 
-Also, there is no 'Approve once' mechanism in Foundry. To get such behavior, you'll need to implement it yourself in the agent code by storing the user choice in a database and checking it before sending the tool call.
+Also, there is no **'Approve once'** mechanism in Foundry. To get such behavior, you'll need to implement it yourself in the agent code by storing the user choice in a database and checking it before sending the tool call.
 :::
 
 > Notice that the agent logic code remains exactly the same whether you use a workflow agent or a prompt agent!
