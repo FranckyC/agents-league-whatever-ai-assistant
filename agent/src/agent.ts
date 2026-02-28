@@ -31,7 +31,7 @@ export class CustomAgentWorkflow extends AgentApplication<TurnState> {
     // Create conversation and user state with in-memory storage provider.
     this.conversationState = new ConversationState(storage);
     this.userState = new UserState(storage);
-    const agentService = new AgentService(project, "workflow-agent");
+    const agentService = new AgentService(project, workflowAgentName);
     this.agentDialogState = this.conversationState.createProperty("DialogState");
     this.debugStateAccessor = this.userState.createProperty("DebugMode");
 
