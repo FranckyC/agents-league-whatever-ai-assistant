@@ -93,7 +93,7 @@ export class AgentDialog extends ComponentDialog {
 
         // Replace the approval card with a read-only version showing the decision
         // The updateActivity doesn'T work for Copilot channel for now :/
-        if ((value.action === CardAction.ToolApproved || value.action === CardAction.ToolDenied) && (innerDC.context.activity.channelData.source.name != 'copilot')) {
+        if ((value.action === CardAction.ToolApproved || value.action === CardAction.ToolDenied) && (innerDC.context.activity.channelData?.productContext  != 'COPILOT')) {
           const approved = value.action === CardAction.ToolApproved;
           await AdaptiveCardHelper.updateApprovalCardWithDecision(
             innerDC.context,

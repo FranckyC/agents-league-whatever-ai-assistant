@@ -37,6 +37,7 @@ import HrMcpToolApproval from './img/mcp_configure_tool_approval.png';
 import CopilotToolApproval from './img/copilot_tool_approval.png';
 import HrAgentToolSelection from './img/agent_tool_selection.png';
 import ConfigureMcpTools from './img/configure_mcp_tools.png';
+import ToolApprovedTeams from './img/tool_approved_teams.png';
 
 # Getting started
 
@@ -521,6 +522,15 @@ Open an new chat in the Copilot application to reset the conversation (you can a
 <div className='flex justify-center items-center my-6'>
     <img className="w-[60%] rounded-lg shadow-lg" src={CopilotToolApproval} />
 </div>
+
+:::tip 
+On Teams experience, the card is updated wit hthe user choice. However, it seems taht is not possibel to achieve the same in the Copilot channel (meaning the approval card is not updated).
+<div className='flex justify-center items-center my-6'>
+    <img className="w-[60%] rounded-lg shadow-lg" src={ToolApprovedTeams} />
+</div>
+
+Also, there is no 'Approve once' mechanism in Foundry. To get such behavior, you'll need to implement it yourself in the agent code by storing the user choice in a database and checking it before sending the tool call.
+:::
 
 > Notice that the agent logic code remains exactly the same whether you use a workflow agent or a prompt agent!
 
