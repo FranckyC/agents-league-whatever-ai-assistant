@@ -75,6 +75,10 @@ Install-Module -Name Az.Accounts, Az.Resources, Az.Websites, Az.KeyVault -Scope 
 
 ---
 
+:::info
+Clone the GitHub repository from here [https://github.com/FranckyC/agents-league-whatever-ai-assistant](https://github.com/FranckyC/agents-league-whatever-ai-assistant) and open the root solution folder.
+:::
+
 ## Prepare the data
 
 This solution demonstrates a common use case encountered in companies: getting answers or taking actions about specific internal transversal domains. We take the example of **HR** and **IT** departments (likely the most common ones), each having their own SharePoint site with policy documents. Employees can ask questions related to these policies and get answers grounded in the documents. For the IT agent, we also showcase a **ticket submission** system via a SharePoint list.
@@ -445,7 +449,7 @@ Now ask a question related to IT, for example: _"What is the BYOD policy?"_. The
 
 ### Ticket Submission — Write Operations
 
-Test the ticket submission system by asking a question that would trigger the fallback agent, for example: _"I have an issue with my laptop, I want to raise a ticket"_. The fallback agent should recognize that this is an IT-related question and direct it to the IT agent. The IT agent will then ask for more details and send a card to gather information:
+Test the ticket submission system by asking a question that would trigger the IT agent, for example: _"I have an issue with my laptop, I want to raise a ticket"_. The IT agent should recognize that this is an IT-related question and direct it to the IT agent. The IT agent will then ask for more details and send a card to gather information:
 
 <div className='flex justify-center items-center my-6'>
     <img className="w-[80%] rounded-lg shadow-lg" src={CopilotItTicketSubmit} />

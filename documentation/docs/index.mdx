@@ -133,7 +133,7 @@ flowchart LR
     style N2 fill:#fef3c7,color:#92400e,stroke:#f59e0b,stroke-dasharray: 5 5
     style N3 fill:#fef3c7,color:#92400e,stroke:#f59e0b,stroke-dasharray: 5 5
 ```
-For instance the question "How can I reset my password?" would be routed to the IT agent, while "What is the leave policy?" would be routed to the HR agent without the user noticing.
+For instance the question "_How can I reset my password?_" would be routed to the IT agent, while "_What is the leave policy?_" would be routed to the HR agent without the user noticing.
 
 To improve user experience, we use the **OpenAI Responses API** streaming capability coupled with **Teams streaming**:
 
@@ -208,7 +208,7 @@ Knowing *why* your agent gave a wrong answer is key to improving it. This soluti
 
 ### OpenTelemetry Integration for MCP Tools
 
-The solution demonstrates how to integrate **OpenTelemetry** with HTTP headers with propagation (`traceparent`) in MCP tools to capture detailed telemetry for all interactions with the MCP server — including tool calls, responses, and errors. This allows developers to monitor and troubleshoot their agents more effectively, with insights directly integrated into the **Foundry portal** via Application Insights.
+The solution demonstrates how to integrate **OpenTelemetry** with HTTP headers with propagation (`traceparent`) in MCP tools to capture detailed telemetry for all interactions with the MCP server — including tool calls, responses, and errors. This allows developers to monitor and troubleshoot their agents more effectively in addition to the Agent Service builtin open telemetry integration, with insights directly integrated into the **Foundry portal** via Application Insights.
 
 <div className='flex justify-center items-center my-6'>
     <img className="w-[80%] rounded-lg shadow-lg" src={OpenTelemetry} />
@@ -254,7 +254,7 @@ Using Microsoft Foundry Agent Service offloads many time-consuming aspects of de
 - Fine-tuning capabilities for specific base models.
 - **Agent testability via built-in and customizable evaluation tools.**
 - Built-in guardrails.
-- Built-in memory management.
+- Built-in memory management (short term/long term).
 - **Monitoring via built-in integration with Azure Monitor/Application Insights and OpenTelemetry.**
 
 Because it is an Azure resource like any other, it also means all the infrastructure provisioning can be automated using Infrastructure as Code (IaC) tools like Bicep or Terraform, which is essential for maintaining consistency across different environments (development, testing, production).
