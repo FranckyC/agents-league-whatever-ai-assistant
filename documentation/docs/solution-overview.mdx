@@ -4,6 +4,7 @@ sidebar_position: 2
 
 import Architecture from './img/architecture.png';
 import Workflow from './img/workflow_run.png';
+import AzureAIUserRole from './img/azure_ai_user_role.png'; 
 
 # Solution overview
 
@@ -33,30 +34,40 @@ This architecture relies entirely on the Microsoft stack — Azure AI Foundry, M
 
 <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-5">
     <p className="font-semibold text-lg mb-2">① Conversation start</p>
-    <p className="text-sm mb-0">The user opens a new session with the agent through <strong>Microsoft 365 Copilot Chat</strong> or <strong>Microsoft Teams</strong>.</p>
+    <p className="mb-0">The user opens a new session with the agent through <strong>Microsoft 365 Copilot Chat</strong> or <strong>Microsoft Teams</strong>.</p>
+    <p className="mb-0">Behind the scenes, the agent application connects to the Foundry project resource using a managed identity and opens a new conversation with the workflow agent via the OpenAI Responses API (through the Foundry SDK).</p>
 </div>
+
+:::tip Local development
+For local development testing, you can't use a managed identity but a client ID / client secret. When interacting with Foundry resources and agents, the identity (managed identity or SPN) requires at least the **Azure AI User** role assignment:
+
+<div className='flex justify-center items-center my-4'>
+    <img className="w-[80%] rounded-lg shadow-lg" src={AzureAIUserRole} />
+</div>
+
+:::
 
 <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-5">
     <p className="font-semibold text-lg mb-2">② Authentication & consent</p>
-    <p className="text-sm mb-0">The message is routed to the workflow agent in Azure AI Foundry. If this is the user's first interaction, the MCP server triggers a <strong>consent flow</strong> to authenticate the user. Authentication is handled externally by the Foundry Agent Service using OAuth.</p>
-    <p className="text-xs italic mt-2 mb-0 opacity-70">Note: there is currently no technical mechanism to programmatically detect authentication success.</p>
+    <p className="mb-0">The message is routed to the workflow agent in Azure AI Foundry. If this is the user's first interaction, the MCP server triggers a <strong>consent flow</strong> to authenticate the user. Authentication is handled externally by the Foundry Agent Service using OAuth.</p>
+    <p className="italic mt-2 mb-0 opacity-70">Note: there is currently no technical mechanism to programmatically detect authentication success.</p>
 </div>
 
 <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-5">
     <p className="font-semibold text-lg mb-2">③ Intent classification & routing</p>
-    <p className="text-sm mb-3">Once authenticated, the user continues the conversation in Copilot or Teams. The original question is sent to the <strong>workflow agent</strong>, which starts with the <strong>router agent</strong>. The router classifies the user's intent and forwards the question to the appropriate specialized agent:</p>
+    <p className="mb-3">Once authenticated, the user continues the conversation in Copilot or Teams. The original question is sent to the <strong>workflow agent</strong>, which starts with the <strong>router agent</strong>. The router classifies the user's intent and forwards the question to the appropriate specialized agent:</p>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-3">
-            <p className="font-medium text-sm mb-1">🖥️ IT Agent</p>
-            <p className="text-xs mb-0">IT policy-related questions</p>
+            <p className="font-medium mb-1">🖥️ IT Agent</p>
+            <p className="mb-0">IT policy-related questions</p>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-3">
-            <p className="font-medium text-sm mb-1">📋 HR Agent</p>
-            <p className="text-xs mb-0">HR policy-related questions</p>
+            <p className="font-medium mb-1">📋 HR Agent</p>
+            <p className="mb-0">HR policy-related questions</p>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-3">
-            <p className="font-medium text-sm mb-1">🛡️ Fallback Agent</p>
-            <p className="text-xs mb-0">Anything outside IT or HR scope</p>
+            <p className="font-medium mb-1">🛡️ Fallback Agent</p>
+            <p className="mb-0">Anything outside IT or HR scope</p>
         </div>
     </div>
 
@@ -64,17 +75,82 @@ This architecture relies entirely on the Microsoft stack — Azure AI Foundry, M
         <img className="w-full rounded-lg shadow-lg" src={Workflow} />
     </div>
 
-    <p className="text-sm mt-3 mb-0">Each agent has specific instructions and parameters. For instance, HR and IT agents search for information in different SharePoint paths, and only the IT agent has the ability to submit tickets.</p>
+    <p className="mt-3 mb-0">Each agent has specific instructions and parameters. For instance, HR and IT agents search for information in different SharePoint paths, and only the IT agent has the ability to submit tickets.</p>
 </div>
 
 <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-5">
     <p className="font-semibold text-lg mb-2">④ Knowledge retrieval & ticket submission</p>
-    <p className="text-sm mb-0">The IT or HR agent calls the <code>copilot_retrieval</code> tool to search for relevant policy documents in <strong>SharePoint</strong>. The agent then answers the question grounded in the retrieved content. If no verified answer is found, the <strong>IT agent</strong> proactively offers to raise a support ticket. If the user accepts (or directly requests one), the agent calls the <code>submit_ticket</code> tool to create a ticket in a <strong>SharePoint list</strong>.</p>
+    <p className="mb-0">The IT or HR agent calls the <code>copilot_retrieval</code> tool to search for relevant policy documents in <strong>SharePoint</strong>. The agent then answers the question grounded in the retrieved content. If no verified answer is found, the <strong>IT agent</strong> proactively offers to raise a support ticket. If the user accepts (or directly requests one), the agent calls the <code>submit_ticket</code> tool to create a ticket in a <strong>SharePoint list</strong>.</p>
+
+    <p className="font-semibold mt-4 mb-2">MCP Tools</p>
+
+    <div className="bg-gray-50 dark:bg-gray-900/40 rounded-md p-4 mb-4">
+        <p className="font-mono font-semibold mb-1">copilot_retrieval</p>
+        <p className="italic mb-3">Retrieve data for grounding purposes for Human Resources and Information Technology topics.</p>
+        <table className="w-full">
+            <thead>
+                <tr>
+                    <th className="text-left pb-1">Parameter</th>
+                    <th className="text-left pb-1">Type</th>
+                    <th className="text-left pb-1">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td className="py-1 pr-2 font-mono">queryString</td><td className="py-1 pr-2">string</td><td className="py-1">User query optimized for keywords search</td></tr>
+                <tr><td className="py-1 pr-2 font-mono">filterExpression</td><td className="py-1 pr-2">string (optional)</td><td className="py-1">Filter expression for search. For SharePoint documents, use <code>Path:"https://mytenant.sharepoint.com/sites/mysite/Shared%20Documents/MyFolder*"</code></td></tr>
+                <tr><td className="py-1 pr-2 font-mono">dataSource</td><td className="py-1 pr-2">enum: <code>sharePoint</code> | <code>externalItem</code></td><td className="py-1">Type of item to search for. Use <code>sharePoint</code> for documents, <code>externalItem</code> for DailyHub. Default: <code>sharePoint</code></td></tr>
+                <tr><td className="py-1 pr-2 font-mono">connections</td><td className="py-1 pr-2">string[]</td><td className="py-1">Array of connection IDs for external data sources. Use only when dataSource is <code>externalItem</code> for DailyHub content retrieval. Default: <code>[]</code></td></tr>
+                <tr><td className="py-1 pr-2 font-mono">language</td><td className="py-1 pr-2">enum: <code>fr-FR</code> | <code>en-US</code> | <code>null</code></td><td className="py-1">Language of the input query. <code>fr-FR</code> for French, <code>en-US</code> for English. Use <code>null</code> if undetermined. Default: <code>null</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div className="bg-gray-50 dark:bg-gray-900/40 rounded-md p-4 mb-4">
+        <p className="font-mono font-semibold mb-1">submit_ticket</p>
+        <p className="italic mb-3">Create an IT support ticket to report an issue. The agent always gathers all required information — including severity level — before submitting.</p>
+        <table className="w-full">
+            <thead>
+                <tr>
+                    <th className="text-left pb-1">Parameter</th>
+                    <th className="text-left pb-1">Type</th>
+                    <th className="text-left pb-1">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td className="py-1 pr-2 font-mono">subject</td><td className="py-1 pr-2">string</td><td className="py-1">Subject of the issue</td></tr>
+                <tr><td className="py-1 pr-2 font-mono">details</td><td className="py-1 pr-2">string</td><td className="py-1">Details describing the problem more in-depth</td></tr>
+                <tr><td className="py-1 pr-2 font-mono">severity</td><td className="py-1 pr-2">enum: <code>Critical</code> | <code>Medium</code> | <code>Low</code></td><td className="py-1">Severity level of the issue</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p className="mt-3 mb-0">Using the Agent Service <strong>OAuth Identity Passthrough</strong> feature, the MCP requests contain the necessary Bearer token for the authenticated user to call the Microsoft Graph APIs on their behalf. A claims-based JWT validation is performed to verify the token (expiration time, audience, tenant ID, and issuer) — signature verification is not possible because Microsoft Graph tokens use a nonce-based signing scheme that prevents third-party cryptographic validation.</p>
+
 </div>
+
+:::info Specific agent instructions
+Each agent has its own tool configuration and parameter values (e.g., different SharePoint sites for IT and HR). Below is an example of the HR agent prompt for tool calls:
+
+```plaintext title="HR agent prompt with tool instructions"
+...
+### Step 2: Retrieve Policy Content
+
+**You MUST call the `copilot_retrieval` tool for every new question, even if a similar question was asked earlier in the conversation.** Never answer from memory or prior retrieval results.
+
+Call the `copilot_retrieval` tool to get grounding data for Human Resources with the following parameters:
+
+| Parameter          | Value                                                                                                                      |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `dataSource`       | `"sharePoint"`                                                                                                             |
+| `filterExpression` | `"Path:\"https://sonbaedev.sharepoint.com/sites/hr-portal/Shared%20Documents\""` |
+| `queryString`      | The user's clarified question (rewrite for retrieval clarity only if the original is very short, without changing meaning)  |
+...
+```
+:::
 
 <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-5">
     <p className="font-semibold text-lg mb-2">⑤ Secure, delegated access via Microsoft Graph</p>
-    <p className="text-sm mb-0">All tool calls leverage the <strong>Microsoft Graph API</strong> — either through the Copilot Retrieval API for document search, or through SharePoint REST APIs for ticket creation. Thanks to the <strong>OAuth Identity Passthrough</strong> feature, every operation is executed on behalf of the authenticated user with a proper Bearer token issued by the Agent Service to the MCP server. The tool output is then returned to the agent, which uses it to deliver the final answer or confirm the ticket submission.</p>
+    <p className="mb-0">All tool calls are executed through the <strong>Microsoft Graph API</strong> — the Copilot Retrieval API for document search and SharePoint list APIs for ticket creation — using the delegated Bearer token provided by the Foundry Agent Service. Tool outputs are then returned to the agent, which uses them to compose the final response.</p>
 </div>
 
 </div>

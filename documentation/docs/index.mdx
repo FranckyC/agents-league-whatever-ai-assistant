@@ -151,9 +151,9 @@ We use **GPT 4.1** for all the agents as it is sufficiently capable of handling 
 
 ---
 
-### Secure MCP Server with OAuth Identity Passthrough
+### Secure MCP Server with OAuth Identity Passthrough + claims-based JWT validation
 
-Leverage the Agent Service MCP [OAuth Identity Passthrough](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/mcp-authentication?view=foundry#oauth-identity-passthrough) feature to securely make requests **on behalf of the current user** through MCP tools.
+A custom stateless MCP server that leverages the Agent Service [OAuth Identity Passthrough](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/mcp-authentication?view=foundry#oauth-identity-passthrough) feature to securely execute requests **on behalf of the authenticated user** through MCP tools. Incoming requests from the Agent Service are verified using a claims-based JWT validation (expiration, audience, tenant ID, and issuer).
 
 <div className='flex justify-center items-center gap-4 my-6'>
     <img className="w-[45%] rounded-lg shadow-lg" src={McpAuthentication} />

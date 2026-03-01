@@ -1,5 +1,7 @@
 import { Router, Request, Response, IRouter } from 'express';
 import { OtelAgentTracer } from '../helpers/otelTracer';
+import { JwtValidator } from '../helpers/jwtValidator';
+import { config } from '../config';
 import { propagation, context } from '@opentelemetry/api';
 
 // Lazy-loaded to avoid pulling in heavy MCP SDK + Zod + Graph dependencies at startup
@@ -33,6 +35,19 @@ export interface McpRouterResult {
 export function mcpRouter(telemetry: OtelAgentTracer): McpRouterResult {
     const router = Router();
 
+    // --- JWT validation setup ---
+    const mcpTenantId = config.tenantId;
+
+    let jwtValidator: JwtValidator | null = null;
+    if (mcpTenantId) {
+        jwtValidator = new JwtValidator({
+            tenantId: mcpTenantId,
+        });
+        console.log(`[MCP] JWT validation enabled — tenant: ${mcpTenantId}`);
+    } else {
+        console.warn('[MCP] JWT validation is DISABLED — tenant ID is not set');
+    }
+
     // McpServerManager is created lazily on first request to avoid loading
     // heavy dependencies (MCP SDK, Zod, Graph client) at server startup.
     let mcpManager: InstanceType<typeof import('../services/mcpServer').McpServerManager> | null = null;
@@ -53,6 +68,31 @@ export function mcpRouter(telemetry: OtelAgentTracer): McpRouterResult {
     // Handle POST requests — each request gets a fresh stateless server + transport
     router.post('/mcp', async (req: Request, res: Response) => {
         attachAuthInfo(req);
+
+        // --- Validate the JWT token before processing ---
+        const token = (req as any).auth?.token as string | undefined;
+
+        if (jwtValidator) {
+            if (!token) {
+                res.status(401).json({
+                    jsonrpc: '2.0',
+                    error: { code: -32001, message: 'Missing Authorization Bearer token' },
+                    id: null,
+                });
+                return;
+            }
+
+            const validationError = await jwtValidator.validate(token);
+            if (validationError) {
+                console.warn(`[MCP] JWT validation failed (${validationError.status}): ${validationError.error}`);
+                res.status(validationError.status).json({
+                    jsonrpc: '2.0',
+                    error: { code: -32001, message: `Unauthorized: ${validationError.error}` },
+                    id: null,
+                });
+                return;
+            }
+        }
 
         // Extract OpenTelemetry context propagated from the caller's headers
         const activeContext = propagation.extract(context.active(), req.headers);
