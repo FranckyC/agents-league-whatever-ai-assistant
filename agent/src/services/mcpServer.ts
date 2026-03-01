@@ -35,8 +35,8 @@ export class McpServerManager {
                 inputSchema: {
                     queryString: z.string().describe('User query optimized for keywords search'),
                     filterExpression: z.string().optional().describe('The filter expression to use for search according to the datasource. For SharePoint documents search, use the filter expression \'Path:"https://mytenant.sharepoint.com/sites/mysite/Shared%20Documents/MyFolder*"\''),
-                    dataSource: z.enum(['externalItem', 'sharePoint']).default('sharePoint').describe('The type of item to search for. For documents use "sharePoint", for DailyHub use "externalItem"'),
-                    connections: z.array(z.string()).default([]).describe('Array of connection IDs for external data sources. Use default only when dataSource is set to "externalItem" for DailyHub content retrieval'),
+                    dataSource: z.enum(['externalItem', 'sharePoint']).default('sharePoint').describe('The type of item to search for. For documents use "sharePoint", for external data sources use "externalItem"'),
+                    connections: z.array(z.string()).default([]).describe('Array of connection IDs for external data sources. Use only when dataSource is set to "externalItem"'),
                     language: z.enum(['fr-FR', 'en-US']).nullable().default(null).describe("The language of the input query. 'fr-CA' for French, 'en-US' for English. If the language cannot be determined, use null"),
                 },
             },

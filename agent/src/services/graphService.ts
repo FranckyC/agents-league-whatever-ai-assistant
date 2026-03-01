@@ -67,7 +67,7 @@ export class GraphService {
     /**
      * Searches Microsoft 365 Copilot retrieval API for grounding data.
      * 
-     * Queries SharePoint documents or external items (e.g. DailyHub) via the
+     * Queries SharePoint documents or external items via the
      * `POST /copilot/retrieval` endpoint and returns deduplicated, URL-grouped
      * results with text extracts suitable for LLM grounding.
      * 
