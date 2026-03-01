@@ -120,7 +120,7 @@ npm run start
 
 ## Author
 
-**Franck Cornu** — Microsoft 365 Copilot/AI Architect · M365 Development · Copilot Extensibility
+**Franck Cornu** — Microsoft 365 Copilot/AI Architect · MVP M365 Development/Copilot Extensibility
 
 [LinkedIn](https://www.linkedin.com/in/franckcornu) · [Blog](https://blog.franckcornu.com/)
 
