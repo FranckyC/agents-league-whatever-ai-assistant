@@ -59,11 +59,6 @@ export class JwtValidator {
             const claims = decodeJwt(token);
             const now = Math.floor(Date.now() / 1000);
 
-            // Check expiration — 401 (authentication failure)
-            if (claims.exp && claims.exp < now - 60) {
-                return { status: 401, error: "Token has expired" };
-            }
-
             // Check not-before — 401 (authentication failure)
             if (claims.nbf && claims.nbf > now + 60) {
                 return { status: 401, error: "Token is not yet valid (nbf claim is in the future)" };
