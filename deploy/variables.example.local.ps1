@@ -13,4 +13,3 @@ $ENV_MICROSOFT_FOUNDRY_ENDPOINT_URL="https://cog-agents-<id>.services.ai.azure.c
 $ENV_MCP_SERVER_URL="https://app-agents-<id>.azurewebsites.net"
 $ENV_RETRIEVAL_FILTER_EXPRESSION_HR='Path:\"https://{tenant}.sharepoint.com/sites/hr-portal/Shared%20Documents\"'
 $ENV_RETRIEVAL_FILTER_EXPRESSION_IT='Path:\"https://{tenant}.sharepoint.com/sites/it-portal/Shared%20Documents\"'
-$ENV_RETRIEVAL_FILTER_EXPRESSION_IT='Path:\"https://{tenant}.sharepoint.com/sites/it-portal/Shared%20Documents\"'
